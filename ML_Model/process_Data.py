@@ -23,7 +23,8 @@ dfs = []
 for filename in os.listdir('./datasets'):
     if (filename != 'Datasets.md'):
         fdf = getDF('./datasets/' + filename)
-        dfs.append(fdf)
+        needed = pd.DataFrame({'category': filename[8:-10], 'review': fdf['summary'] + ". " + fdf['reviewText']})
+        dfs.append(needed)
 
 df = pd.concat(dfs)
 
