@@ -1,9 +1,9 @@
 swagger: '2.0'
 info:
-  title: Cloud Endpoints + GCF
-  description: Sample API on Cloud Endpoints with a Google Cloud Functions backend
+  title: FairFilter API - Cloud Endpoints + GCF
+  description: FairFilter API on Cloud Endpoints with a Google Cloud Functions backend
   version: 1.0.0
-host: cloud-run-service-fairmarket-4ktigmtuya-ue.a.run.app
+host: cloud-run-service-fairfilter-siddtatwca-uc.a.run.app
 schemes:
   - https
 produces:
@@ -14,9 +14,21 @@ paths:
       summary: Greet a user
       operationId: hello
       x-google-backend:
-        address: https://us-east1-fairmarket-269020.cloudfunctions.net/functionHelloTest
+        address: https://us-central1-fairfilter.cloudfunctions.net/functionHello
       responses:
         '200':
           description: A successful response
           schema:
             type: string
+  /predict:
+    post:
+      summary: Greet a user
+      operationId: predict
+      x-google-backend:
+        address: https://us-central1-fairfilter.cloudfunctions.net/functionPredict
+      responses:
+        '200':
+          description: A successful response
+          schema:
+            type: string
+            
