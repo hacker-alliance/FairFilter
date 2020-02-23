@@ -32,7 +32,7 @@ for filename in os.listdir('./datasets'):
 df = pd.concat(dfs)
 df.to_csv('out.csv', header=False, index=False)
 
-# comment out ines 21-31 if you ONLY need to grab the sample.
+# comment out lines 21-31 if you ONLY need to grab the sample.
 # if you need to grab both, comment the for loop out and uncomment the commented
 # lines in the above for loop
 for filename in os.listdir('./datasets'):
