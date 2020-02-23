@@ -12,6 +12,7 @@ import re
 from urllib.parse import urlparse
 import urllib
 from selenium.webdriver.chrome.options import Options 
+import os, shutil
 class mainWindow(mainWindow.Ui_MainWindow, QtWidgets.QMainWindow):
      
     def __init__(self):
@@ -31,6 +32,7 @@ class mainWindow(mainWindow.Ui_MainWindow, QtWidgets.QMainWindow):
         newLink = newLink.replace("dp/", "")
         reviews = []
         asin = newLink.replace("/ref=sr_1_", "")
+        asin = asin[:-1]
         html = urllib.request.urlopen(windowAddress).read()
         soup = BeautifulSoup(html, 'html.parser')
         html = soup.prettify('utf-8')
@@ -40,11 +42,14 @@ class mainWindow(mainWindow.Ui_MainWindow, QtWidgets.QMainWindow):
             name_of_product = spans.text.strip()
             product_json['name'] = name_of_product
             break
+
         product_json['catagories'] = []
         for span in soup.findAll('span', class_ = 'nav-a-content'):
-            catagories = span.text.strip()
-            product_json['catagories'] = catagories
-            break
+            if span.text:
+                catagories = span.text.strip()
+                product_json['catagories'] = catagories
+                print(catagories)
+                break
         
         # This block of code will help extract the image of the item in dollars
         # This block of code will help extract the average star rating of the product
@@ -93,8 +98,28 @@ class mainWindow(mainWindow.Ui_MainWindow, QtWidgets.QMainWindow):
         nameOfFile = nameOfFile.replace("[]", "")
         # print(nameOfFile)
         # Saving the scraped data in json format
-        with open(nameOfFile + ".json", 'w') as outfile:
-            json.dump(product_json, outfile, indent=4)
+        # Checks for json animal path
+        jsonDir = "jsonData"
+        jsonDirFile = "jsonData/" + product_json["catagories"]
+
+    
+        # Check parent folder to prevent creation of improper directories
+        if not os.path.exists(jsonDir):
+            os.makedirs(jsonDir)
+        if not os.path.exists(jsonDirFile):
+            os.makedirs(jsonDirFile)
+
+        # Opens up the JSON file
+        file = open(nameOfFile + ".json", "w")
+
+        # Dumps the data to the file
+        json.dump(product_json, file, indent = 1)
+        file.close()
+
+        
+
+        # Move to local directory for json
+        shutil.move(file.name, jsonDirFile)
         print ('----------Extraction of data is complete. Check json file.----------')
     
     def seleniumLaunch(self, index):
@@ -120,7 +145,7 @@ class mainWindow(mainWindow.Ui_MainWindow, QtWidgets.QMainWindow):
             elems.click()
         except:
             driver.close()
-            print("Seems we've hit something captain! And it isn't pictures...")
+            print("Seems we've hit something captain! And it isn't items...")
         
         # Grabs the current URL
         windowAddress = driver.current_url
