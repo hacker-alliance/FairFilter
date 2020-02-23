@@ -1,0 +1,22 @@
+swagger: '2.0'
+info:
+  title: Cloud Endpoints + GCF
+  description: Sample API on Cloud Endpoints with a Google Cloud Functions backend
+  version: 1.0.0
+host: cloud-run-service-fairmarket-4ktigmtuya-ue.a.run.app
+schemes:
+  - https
+produces:
+  - application/json
+paths:
+  /hello:
+    get:
+      summary: Greet a user
+      operationId: hello
+      x-google-backend:
+        address: https://us-east1-fairmarket-269020.cloudfunctions.net/functionHelloTest
+      responses:
+        '200':
+          description: A successful response
+          schema:
+            type: string
