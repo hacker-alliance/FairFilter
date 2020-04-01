@@ -131,3 +131,6 @@ dmypy.json
 #Ignore Datasets
 datasets/*.json
 datasets/*.gz
+
+#Ignore Output
+*.csv
