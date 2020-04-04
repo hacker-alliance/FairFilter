@@ -22,13 +22,13 @@ def processFile(filename):
         df['category'] = filename[0:-8]
         df = df[['review', 'category']]
         gc.collect()
-        # Convert to Lowercase (agressively)
-        df['review'] = df['review'].str.casefold()
-        # Convert all whitespace to space
-        df['review'] = df['review'].str.replace('[\s]', ' ')
-        # Remove all punctuation except for single quote
-        df['review'] = df['review'].str.replace("[^\w\s']", "")
-
+        # Convert to Lowercase
+        df['review'] = df['review'].str.lower()
+        # Convert all contiguous whitespace to a single space
+        df['review'] = df['review'].str.replace('[\s]*', ' ')
+        # Remove all punctuation and Leading / trailing whitespace except for single quote /
+        df['review'] = df['review'].str.replace(
+            "[^\w\s']|^\s||(^\s)|(\s$)", "")
         df.to_csv('./datasets/' +
                   filename[0:-8] + '.csv', mode='a+', index=False)
     print('Finished: ' + filename)
