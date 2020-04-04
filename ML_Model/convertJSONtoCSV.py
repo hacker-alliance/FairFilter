@@ -10,27 +10,25 @@ chunklines = 1000000
 def processFile(filename):
     print('Starting: ' + filename)
     chunks = pd.read_json('./raw_data/' + filename,
-                          lines=True, chunksize=chunklines, compression='gzip')
+                          lines=True, chunksize=chunklines)
     for df in chunks:
         # Only Keep Columns We Care About
         df = df[['summary', 'reviewText']]
-        gc.collect()
         # Dimensionality Reduction
         df['review'] = df['summary'].astype(
             str) + ' ' + df['reviewText'].astype(str)
-        # Labeling
-        df['category'] = filename[0:-8]
-        df = df[['review', 'category']]
-        gc.collect()
+        df = df[['review']]
         # Convert to Lowercase
         df['review'] = df['review'].str.lower()
         # Convert all contiguous whitespace to a single space
-        df['review'] = df['review'].str.replace('[\s]*', ' ')
+        df['review'] = df['review'].str.replace('\s+', ' ')
         # Remove all punctuation and Leading / trailing whitespace except for single quote /
         df['review'] = df['review'].str.replace(
-            "[^\w\s']|^\s||(^\s)|(\s$)", "")
+            "[^\w\s']|(^\s)|(\s$)", "")
+        # Labeling
+        df['category'] = filename[0:-5]
         df.to_csv('./datasets/' +
-                  filename[0:-8] + '.csv', mode='a+', index=False)
+                  filename[0:-5] + '.csv', mode='a+', index=False)
     print('Finished: ' + filename)
 
 
