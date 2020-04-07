@@ -1,10 +1,15 @@
 import os
 import pandas as pd
+import re
 import multiprocessing as mp
 import gc
 
 excludeFiles = ['Datasets.md']
 chunklines = 1000000
+
+whitespaceExp = re.compile('\s\s+')
+punctuationExp = re.compile("[^\w\s']")
+leadTrailExp = re.compile("^\s+|\s+$")
 
 
 def processFile(filename):
@@ -20,11 +25,14 @@ def processFile(filename):
         df = df[['review']]
         # Convert to Lowercase
         df['review'] = df['review'].str.lower()
-        # Convert all contiguous whitespace to a single space
-        df['review'] = df['review'].str.replace('\s+', ' ')
-        # Remove all punctuation and Leading / trailing whitespace except for single quote /
+        # Remove all punctuation aexcept for single quote
         df['review'] = df['review'].str.replace(
-            "[^\w\s']|(^\s)|(\s$)", "")
+            punctuationExp, "")
+        # Convert all contiguous whitespace to a single space
+        df['review'] = df['review'].str.replace(whitespaceExp, ' ')
+        # Remove Leading / Trailing whitespace
+        df['review'] = df['review'].str.replace(
+            leadTrailExp, "")
         # Labeling
         df['category'] = filename[0:-5]
         df.to_csv('./datasets/' +
