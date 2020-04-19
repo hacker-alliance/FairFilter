@@ -13,8 +13,8 @@ args = parser.parse_args()
 excludeFiles = ['Datasets.md']
 
 
-def processFile(filename, queue):
-    print('Importing / Labeling: ' + filename)
+def processDataset(filename, queue):
+    print('Importing: ' + filename)
     df_file = pd.read_csv('./datasets/' + filename, dtype=str,
                           usecols=['review', 'category'])
     # Cleaning - Drop Duplicates
@@ -27,9 +27,24 @@ def processFile(filename, queue):
     if args.n > l:
         nKeep = l
         print('Warning: Requested More Samples Than Available')
-    df_file = df_file.sample(n=nKeep)
-    gc.collect()
-    queue.put(df_file)
+    else:
+        df_file = df_file.sample(n=nKeep)
+
+    df_file.to_csv('./out/sample_' + str(round(args.n/1000)) +
+                   'k.csv', header=False, index=False, mode='a+')
+
+
+def finalPass():
+    print('Starting Final Pass')
+    df_file = pd.read_csv('./out/sample_' + str(round(args.n/1000)) +
+                          'k.csv', dtype=str,
+                          names=['review', 'category'])
+    # Drop Duplicates - Don't Keep Duplicates Due to Ambiguity
+    df_file.drop_duplicates(
+        subset=['review'], keep=False, inplace=True)
+    df_file.to_csv('./out/sample_' + str(round(args.n/1000)) +
+                   'k.csv', header=False, index=False, mode='w')
+    print('Finished Final Pass')
 
 
 if __name__ == '__main__':
@@ -37,15 +52,7 @@ if __name__ == '__main__':
     q = mp.Queue()
     for filename in os.listdir('./datasets'):
         if (filename not in excludeFiles):
-            p = mp.Process(target=processFile, args=(filename, q))
+            p = mp.Process(target=processDataset, args=(filename, q))
             p.start()
-            df_sample.append(q.get())
-    print('Creating Dataframe')
-    df_sample = pd.concat(df_sample)
-    # Unlikely, But Check for Duplicates Again - Drop All Cases Due to Ambiguity
-    df_sample.drop_duplicates(
-        subset=['review'], keep=False, inplace=True)
-    print("Writing to Output")
-    gc.collect()
-    df_sample.to_csv('out_sample_all' + str(args.n) +
-                     '.csv', header=False, index=False)
+            p.join()
+    finalPass()
